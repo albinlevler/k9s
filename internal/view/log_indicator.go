@@ -26,6 +26,7 @@ type LogIndicator struct {
 	allContainers              bool
 	shouldDisplayAllContainers bool
 	columnLock                 bool
+	detailLevel                int
 }
 
 // NewLogIndicator returns a new indicator.
@@ -124,6 +125,17 @@ func (l *LogIndicator) ToggleAllContainers() {
 	l.Refresh()
 }
 
+// DetailLevel returns the current log detail level.
+func (l *LogIndicator) DetailLevel() int {
+	return l.detailLevel
+}
+
+// ToggleDetailLevel cycles through log detail levels: Compact → Medium → Raw → Compact.
+func (l *LogIndicator) ToggleDetailLevel() {
+	l.detailLevel = (l.detailLevel + 1) % 3
+	l.Refresh()
+}
+
 func (l *LogIndicator) reset() {
 	l.Clear()
 	l.indicator = l.indicator[:0]
@@ -172,10 +184,24 @@ func (l *LogIndicator) Refresh() {
 	}
 
 	if l.TextWrap() {
-		l.indicator = append(l.indicator, fmt.Sprintf(toggleOnFmt, "Wrap", "")...)
+		l.indicator = append(l.indicator, fmt.Sprintf(toggleOnFmt, "Wrap", spacer)...)
 	} else {
-		l.indicator = append(l.indicator, fmt.Sprintf(toggleOffFmt, "Wrap", "")...)
+		l.indicator = append(l.indicator, fmt.Sprintf(toggleOffFmt, "Wrap", spacer)...)
 	}
 
+	detailName := detailLevelName(l.detailLevel)
+	l.indicator = append(l.indicator, fmt.Sprintf("[::b]Detail:["+string(l.styles.K9s.Views.Log.Indicator.ToggleOnColor)+"::b]%s[-::]", detailName)...)
+
 	_, _ = l.Write(l.indicator)
+}
+
+func detailLevelName(level int) string {
+	switch level {
+	case 1:
+		return "Medium"
+	case 2:
+		return "Raw"
+	default:
+		return "Compact"
+	}
 }

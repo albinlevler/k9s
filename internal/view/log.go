@@ -264,6 +264,7 @@ func (l *Log) bindKeys() {
 		ui.KeyF:         ui.NewKeyAction("Toggle FullScreen", l.toggleFullScreenCmd, true),
 		ui.KeyT:         ui.NewKeyAction("Toggle Timestamp", l.toggleTimestampCmd, true),
 		ui.KeyW:         ui.NewKeyAction("Toggle Wrap", l.toggleTextWrapCmd, true),
+		ui.KeyX:         ui.NewKeyAction("Toggle Detail", l.toggleDetailLevelCmd, true),
 		tcell.KeyCtrlS:  ui.NewKeyAction("Save", l.SaveCmd, true),
 		ui.KeyC:         ui.NewKeyAction("Copy", cpCmd(l.app.Flash(), l.logs.TextView), true),
 	})
@@ -486,6 +487,17 @@ func (l *Log) toggleTimestampCmd(evt *tcell.EventKey) *tcell.EventKey {
 	l.indicator.ToggleTimestamp()
 	l.model.ToggleShowTimestamp(l.indicator.showTime)
 	l.indicator.Refresh()
+
+	return nil
+}
+
+func (l *Log) toggleDetailLevelCmd(evt *tcell.EventKey) *tcell.EventKey {
+	if l.app.InCmdMode() {
+		return evt
+	}
+
+	l.indicator.ToggleDetailLevel()
+	l.model.SetDetailLevel(l.indicator.DetailLevel())
 
 	return nil
 }
